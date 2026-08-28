@@ -1,7 +1,7 @@
 {
   "name": "Work-Time Monitor Admin",
   "short_name": "Work-Time Admin",
-  "description": "Admin dashboard for employee connected work-time monitoring.",
+  "description": "Admin dashboard for connected and interpreting work time, using Dominican Republic day boundaries.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

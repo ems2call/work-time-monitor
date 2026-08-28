@@ -250,6 +250,10 @@ button {
   grid-column: 1 / -1;
 }
 
+.interpretingSummary strong {
+  color: #7a3e9d;
+}
+
 .summaryCard span {
   display: block;
   margin-bottom: 4px;
@@ -425,7 +429,7 @@ button {
   }
 
   .summaryGrid {
-    grid-template-columns: 1fr 1fr 1.5fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
   .summaryCard.wide {
@@ -463,4 +467,31 @@ button {
   .activationBox button {
     width: 100%;
   }
+}
+
+.rangeCard {
+  align-items: center;
+}
+
+.rangeName {
+  font-weight: 700;
+}
+
+.rangeTimes {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.rangeTimes span {
+  color: #667085;
+}
+
+.rangeTimes strong {
+  font-size: 13px;
+}
+
+.interpretingValue {
+  color: #7a3e9d;
 }

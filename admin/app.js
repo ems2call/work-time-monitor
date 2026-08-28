@@ -207,10 +207,29 @@ async function loadSnapshot() {
   refreshInFlight = true;
 
   try {
-    snapshotRows = await supabaseRequest('/rest/v1/rpc/monitor_admin_devices', {
-      method: 'POST',
-      body: {}
-    });
+    const [devices, interpretingRows] = await Promise.all([
+      supabaseRequest('/rest/v1/rpc/monitor_admin_devices', {
+        method: 'POST',
+        body: {}
+      }),
+      supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_today', {
+        method: 'POST',
+        body: {}
+      })
+    ]);
+
+    const interpretingByDevice = new Map(
+      (interpretingRows || []).map(row => [
+        row.device_id,
+        Number(row.interpreting_seconds) || 0
+      ])
+    );
+
+    snapshotRows = (devices || []).map(row => ({
+      ...row,
+      interpreting_today_seconds: interpretingByDevice.get(row.device_id) || 0
+    }));
+
     renderSnapshot();
     $('lastRefresh').textContent = `Updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
   } finally {
@@ -223,11 +242,19 @@ function renderSnapshot() {
   container.innerHTML = '';
 
   const connectedCount = snapshotRows.filter(row => row.connected_now).length;
-  const teamToday = snapshotRows.reduce((sum, row) => sum + (Number(row.connected_today_seconds) || 0), 0);
+  const teamToday = snapshotRows.reduce(
+    (sum, row) => sum + (Number(row.connected_today_seconds) || 0),
+    0
+  );
+  const teamInterpretingToday = snapshotRows.reduce(
+    (sum, row) => sum + (Number(row.interpreting_today_seconds) || 0),
+    0
+  );
 
   $('employeeCount').textContent = String(snapshotRows.length);
   $('connectedCount').textContent = String(connectedCount);
   $('teamToday').textContent = formatSeconds(teamToday);
+  $('teamInterpretingToday').textContent = formatSeconds(teamInterpretingToday);
 
   if (!snapshotRows.length) {
     container.innerHTML = '<div class="emptyState">No employees yet.</div>';
@@ -257,16 +284,16 @@ function renderSnapshot() {
           <strong>${formatSeconds(row.connected_today_seconds)}</strong>
         </div>
         <div class="stat">
+          <span>Interpreting Today</span>
+          <strong class="interpretingValue">${formatSeconds(row.interpreting_today_seconds)}</strong>
+        </div>
+        <div class="stat">
           <span>Last signal</span>
           <strong>${timeAgo(row.last_seen_at)}</strong>
         </div>
         <div class="stat">
           <span>Version</span>
           <strong>${escapeHtml(row.extension_version || '—')}</strong>
-        </div>
-        <div class="stat">
-          <span>Device</span>
-          <strong>${neverSeen ? 'Waiting activation' : 'Active'}</strong>
         </div>
       </div>
 
@@ -409,22 +436,53 @@ function toDateInput(date) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
+function dominicanMidnightIso(dateString) {
+  // Dominican Republic is UTC-04:00 year-round.
+  return `${dateString}T00:00:00-04:00`;
+}
+
+function nextCalendarDate(dateString) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day + 1));
+  return date.toISOString().slice(0, 10);
+}
+
 async function loadRange() {
   const from = $('fromDate').value;
   const to = $('toDate').value;
   if (!from || !to) return;
 
-  const fromIso = new Date(`${from}T00:00:00`).toISOString();
-  const toExclusive = new Date(`${to}T00:00:00`);
-  toExclusive.setDate(toExclusive.getDate() + 1);
+  const fromIso = dominicanMidnightIso(from);
+  const toIso = dominicanMidnightIso(nextCalendarDate(to));
 
-  rangeRows = await supabaseRequest('/rest/v1/rpc/monitor_admin_device_totals', {
-    method: 'POST',
-    body: {
-      p_from: fromIso,
-      p_to: toExclusive.toISOString()
-    }
-  });
+  const [connectedRows, interpretingRows] = await Promise.all([
+    supabaseRequest('/rest/v1/rpc/monitor_admin_device_totals', {
+      method: 'POST',
+      body: {
+        p_from: fromIso,
+        p_to: toIso
+      }
+    }),
+    supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_totals', {
+      method: 'POST',
+      body: {
+        p_from: fromIso,
+        p_to: toIso
+      }
+    })
+  ]);
+
+  const interpretingByDevice = new Map(
+    (interpretingRows || []).map(row => [
+      row.device_id,
+      Number(row.interpreting_seconds) || 0
+    ])
+  );
+
+  rangeRows = (connectedRows || []).map(row => ({
+    ...row,
+    interpreting_seconds: interpretingByDevice.get(row.device_id) || 0
+  }));
 
   renderRange();
 }
@@ -442,8 +500,11 @@ function renderRange() {
     const div = document.createElement('div');
     div.className = 'rangeCard';
     div.innerHTML = `
-      <span>${escapeHtml(row.label || 'Unnamed')}</span>
-      <strong>${formatSeconds(row.connected_seconds)}</strong>
+      <span class="rangeName">${escapeHtml(row.label || 'Unnamed')}</span>
+      <div class="rangeTimes">
+        <span>Connected: <strong>${formatSeconds(row.connected_seconds)}</strong></span>
+        <span>Interpreting: <strong class="interpretingValue">${formatSeconds(row.interpreting_seconds)}</strong></span>
+      </div>
     `;
     container.appendChild(div);
   }
@@ -455,12 +516,21 @@ function exportCsv() {
     return;
   }
 
-  const lines = [['Employee','Connected Seconds','Connected Time']];
+  const lines = [[
+    'Employee',
+    'Connected Seconds',
+    'Connected Time',
+    'Interpreting Seconds',
+    'Interpreting Time'
+  ]];
+
   for (const row of rangeRows) {
     lines.push([
       row.label || '',
       String(row.connected_seconds || 0),
-      formatSeconds(row.connected_seconds)
+      formatSeconds(row.connected_seconds),
+      String(row.interpreting_seconds || 0),
+      formatSeconds(row.interpreting_seconds)
     ]);
   }
 
