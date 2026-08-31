@@ -207,11 +207,34 @@ async function loadSnapshot() {
   refreshInFlight = true;
 
   try {
-    const [devices, interpretingRows, callRows] = await Promise.all([
-      supabaseRequest('/rest/v1/rpc/monitor_admin_devices', { method: 'POST', body: {} }),
-      supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_today', { method: 'POST', body: {} }),
-      supabaseRequest('/rest/v1/rpc/monitor_admin_calls_today', { method: 'POST', body: {} })
-    ]);
+    // Employee/device list is the primary data source and must always load.
+    const devices = await supabaseRequest('/rest/v1/rpc/monitor_admin_devices', {
+      method: 'POST',
+      body: {}
+    });
+
+    // Secondary metrics are intentionally fault-tolerant. If one optional
+    // metric RPC fails, employees still remain visible in the dashboard.
+    let interpretingRows = [];
+    let callRows = [];
+
+    try {
+      interpretingRows = await supabaseRequest(
+        '/rest/v1/rpc/monitor_admin_interpreting_today',
+        { method: 'POST', body: {} }
+      );
+    } catch (error) {
+      console.warn('Interpreting Today unavailable:', error);
+    }
+
+    try {
+      callRows = await supabaseRequest(
+        '/rest/v1/rpc/monitor_admin_calls_today',
+        { method: 'POST', body: {} }
+      );
+    } catch (error) {
+      console.warn('Calls Today unavailable:', error);
+    }
 
     const interpretingByDevice = new Map(
       (interpretingRows || []).map(row => [
@@ -221,7 +244,10 @@ async function loadSnapshot() {
     );
 
     const callsByDevice = new Map(
-      (callRows || []).map(row => [row.device_id, Number(row.call_count) || 0])
+      (callRows || []).map(row => [
+        row.device_id,
+        Number(row.call_count) || 0
+      ])
     );
 
     snapshotRows = (devices || []).map(row => ({
@@ -231,7 +257,8 @@ async function loadSnapshot() {
     }));
 
     renderSnapshot();
-    $('lastRefresh').textContent = `Updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
+    $('lastRefresh').textContent =
+      `Updated ${new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})}`;
   } finally {
     refreshInFlight = false;
   }
@@ -463,23 +490,41 @@ async function loadRange() {
   const fromIso = dominicanMidnightIso(from);
   const toIso = dominicanMidnightIso(nextCalendarDate(to));
 
-  const [connectedRows, interpretingRows, callRows] = await Promise.all([
-    supabaseRequest('/rest/v1/rpc/monitor_admin_device_totals', {
+  // Connected totals are the primary range data.
+  const connectedRows = await supabaseRequest(
+    '/rest/v1/rpc/monitor_admin_device_totals',
+    {
       method: 'POST',
-      body: {
-        p_from: fromIso,
-        p_to: toIso
+      body: { p_from: fromIso, p_to: toIso }
+    }
+  );
+
+  let interpretingRows = [];
+  let callRows = [];
+
+  try {
+    interpretingRows = await supabaseRequest(
+      '/rest/v1/rpc/monitor_admin_interpreting_totals',
+      {
+        method: 'POST',
+        body: { p_from: fromIso, p_to: toIso }
       }
-    }),
-    supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_totals', {
-      method: 'POST',
-      body: { p_from: fromIso, p_to: toIso }
-    }),
-    supabaseRequest('/rest/v1/rpc/monitor_admin_call_totals', {
-      method: 'POST',
-      body: { p_from: fromIso, p_to: toIso }
-    })
-  ]);
+    );
+  } catch (error) {
+    console.warn('Interpreting range totals unavailable:', error);
+  }
+
+  try {
+    callRows = await supabaseRequest(
+      '/rest/v1/rpc/monitor_admin_call_totals',
+      {
+        method: 'POST',
+        body: { p_from: fromIso, p_to: toIso }
+      }
+    );
+  } catch (error) {
+    console.warn('Call range totals unavailable:', error);
+  }
 
   const interpretingByDevice = new Map(
     (interpretingRows || []).map(row => [
@@ -489,7 +534,10 @@ async function loadRange() {
   );
 
   const callsByDevice = new Map(
-    (callRows || []).map(row => [row.device_id, Number(row.call_count) || 0])
+    (callRows || []).map(row => [
+      row.device_id,
+      Number(row.call_count) || 0
+    ])
   );
 
   rangeRows = (connectedRows || []).map(row => ({
