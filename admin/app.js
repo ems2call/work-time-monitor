@@ -207,15 +207,10 @@ async function loadSnapshot() {
   refreshInFlight = true;
 
   try {
-    const [devices, interpretingRows] = await Promise.all([
-      supabaseRequest('/rest/v1/rpc/monitor_admin_devices', {
-        method: 'POST',
-        body: {}
-      }),
-      supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_today', {
-        method: 'POST',
-        body: {}
-      })
+    const [devices, interpretingRows, callRows] = await Promise.all([
+      supabaseRequest('/rest/v1/rpc/monitor_admin_devices', { method: 'POST', body: {} }),
+      supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_today', { method: 'POST', body: {} }),
+      supabaseRequest('/rest/v1/rpc/monitor_admin_calls_today', { method: 'POST', body: {} })
     ]);
 
     const interpretingByDevice = new Map(
@@ -225,9 +220,14 @@ async function loadSnapshot() {
       ])
     );
 
+    const callsByDevice = new Map(
+      (callRows || []).map(row => [row.device_id, Number(row.call_count) || 0])
+    );
+
     snapshotRows = (devices || []).map(row => ({
       ...row,
-      interpreting_today_seconds: interpretingByDevice.get(row.device_id) || 0
+      interpreting_today_seconds: interpretingByDevice.get(row.device_id) || 0,
+      calls_today: callsByDevice.get(row.device_id) || 0
     }));
 
     renderSnapshot();
@@ -254,7 +254,11 @@ function renderSnapshot() {
   $('employeeCount').textContent = String(snapshotRows.length);
   $('connectedCount').textContent = String(connectedCount);
   $('teamToday').textContent = formatSeconds(teamToday);
+  const teamCallsToday = snapshotRows.reduce(
+    (sum, row) => sum + (Number(row.calls_today) || 0), 0
+  );
   $('teamInterpretingToday').textContent = formatSeconds(teamInterpretingToday);
+  $('teamCallsToday').textContent = String(teamCallsToday);
 
   if (!snapshotRows.length) {
     container.innerHTML = '<div class="emptyState">No employees yet.</div>';
@@ -286,6 +290,10 @@ function renderSnapshot() {
         <div class="stat">
           <span>Interpreting Today</span>
           <strong class="interpretingValue">${formatSeconds(row.interpreting_today_seconds)}</strong>
+        </div>
+        <div class="stat">
+          <span>Calls Today</span>
+          <strong class="callValue">${Number(row.calls_today) || 0}</strong>
         </div>
         <div class="stat">
           <span>Last signal</span>
@@ -455,7 +463,7 @@ async function loadRange() {
   const fromIso = dominicanMidnightIso(from);
   const toIso = dominicanMidnightIso(nextCalendarDate(to));
 
-  const [connectedRows, interpretingRows] = await Promise.all([
+  const [connectedRows, interpretingRows, callRows] = await Promise.all([
     supabaseRequest('/rest/v1/rpc/monitor_admin_device_totals', {
       method: 'POST',
       body: {
@@ -465,10 +473,11 @@ async function loadRange() {
     }),
     supabaseRequest('/rest/v1/rpc/monitor_admin_interpreting_totals', {
       method: 'POST',
-      body: {
-        p_from: fromIso,
-        p_to: toIso
-      }
+      body: { p_from: fromIso, p_to: toIso }
+    }),
+    supabaseRequest('/rest/v1/rpc/monitor_admin_call_totals', {
+      method: 'POST',
+      body: { p_from: fromIso, p_to: toIso }
     })
   ]);
 
@@ -479,9 +488,14 @@ async function loadRange() {
     ])
   );
 
+  const callsByDevice = new Map(
+    (callRows || []).map(row => [row.device_id, Number(row.call_count) || 0])
+  );
+
   rangeRows = (connectedRows || []).map(row => ({
     ...row,
-    interpreting_seconds: interpretingByDevice.get(row.device_id) || 0
+    interpreting_seconds: interpretingByDevice.get(row.device_id) || 0,
+    call_count: callsByDevice.get(row.device_id) || 0
   }));
 
   renderRange();
@@ -504,6 +518,7 @@ function renderRange() {
       <div class="rangeTimes">
         <span>Connected: <strong>${formatSeconds(row.connected_seconds)}</strong></span>
         <span>Interpreting: <strong class="interpretingValue">${formatSeconds(row.interpreting_seconds)}</strong></span>
+        <span>Calls: <strong class="callValue">${Number(row.call_count) || 0}</strong></span>
       </div>
     `;
     container.appendChild(div);
@@ -521,7 +536,8 @@ function exportCsv() {
     'Connected Seconds',
     'Connected Time',
     'Interpreting Seconds',
-    'Interpreting Time'
+    'Interpreting Time',
+    'Calls'
   ]];
 
   for (const row of rangeRows) {
@@ -530,7 +546,8 @@ function exportCsv() {
       String(row.connected_seconds || 0),
       formatSeconds(row.connected_seconds),
       String(row.interpreting_seconds || 0),
-      formatSeconds(row.interpreting_seconds)
+      formatSeconds(row.interpreting_seconds),
+      String(row.call_count || 0)
     ]);
   }
 

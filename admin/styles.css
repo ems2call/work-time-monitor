@@ -495,3 +495,5 @@ button {
 .interpretingValue {
   color: #7a3e9d;
 }
+
+.callSummary strong,.callValue{color:#0f6b78}
