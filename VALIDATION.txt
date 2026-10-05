@@ -1,0 +1,18 @@
+PASS — Connected Today uses Dominican Republic midnight
+PASS — Interpreting Today uses Dominican Republic midnight
+PASS — Date ranges use Dominican Republic calendar days
+PASS — PWA JavaScript syntax
+PASS — Started Today uses the first connected session in the Dominican Republic day
+PASS — Last Offline uses the latest server-received OFFLINE event in the Dominican Republic day
+PASS — Attendance times render explicitly in America/Santo_Domingo
+PASS — Attendance RPC failure does not hide employee cards
+PASS — No employee extension update required
+Work-Time Monitor Admin PWA v0.11.0 validation
+
+- JavaScript syntax checked for app.js and sw.js.
+- Supabase Realtime listens for monitor_devices UPDATE and monitor_status_events INSERT.
+- Live events are debounced and an event arriving during a refresh is queued.
+- WebSocket heartbeat and automatic reconnect are enabled.
+- 15-second polling remains as a fallback.
+- Existing employee-list and optional-metric fault tolerance remains intact.
+- Version was replaced by Started Today and the empty slot now shows Last Offline.

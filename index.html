@@ -1,13 +1,153 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Work-Time Monitor</title>
-<style>
-body{font-family:Arial,sans-serif;background:#f6f7f9;color:#20242a;margin:0}
-main{max-width:820px;margin:50px auto;padding:30px;background:#fff;border:1px solid #e4e7ec;border-radius:14px;line-height:1.6}
-a{color:#1c508c}
-</style></head><body><main>
-<h1>Work-Time Monitor</h1>
-<p>A workplace extension that automatically tracks connected work time on an authorized work portal and synchronizes totals to an administrator dashboard.</p>
-<p>It does not record calls, microphone audio, camera video, screenshots, keystrokes, account identity, or unrelated browsing activity.</p>
-<p><a href="privacy.html">Privacy Policy</a> · <a href="support.html">Support</a></p>
-</main></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1c508c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Work-Time Admin">
+  <title>Work-Time Monitor Admin</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="appShell">
+    <header class="topbar">
+      <div class="brand">
+        <img src="icons/icon-192.png" alt="" width="42" height="42">
+        <div>
+          <h1>Work-Time Monitor</h1>
+          <p>Admin</p>
+        </div>
+      </div>
+
+      <div class="headerActions hidden" id="headerActions">
+        <button id="refreshBtn" class="iconBtn" title="Refresh" aria-label="Refresh">↻</button>
+        <button id="logoutBtn" class="secondary compact">Logout</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="loginSection" class="panel loginPanel">
+        <div class="panelTitle">
+          <h2>Admin login</h2>
+          <p>Sign in to manage employees and connected work time.</p>
+        </div>
+
+        <label>
+          <span>Email</span>
+          <input id="email" type="email" autocomplete="username" inputmode="email">
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input id="password" type="password" autocomplete="current-password">
+        </label>
+
+        <button id="loginBtn" class="primary full">Login</button>
+        <div id="loginMessage" class="message"></div>
+      </section>
+
+      <div id="adminApp" class="hidden">
+        <section class="iosTip" id="iosTip">
+          <strong>iPhone shortcut</strong>
+          <span>In Safari: Share → Add to Home Screen.</span>
+          <button id="dismissTip" class="textBtn">Hide</button>
+        </section>
+
+        <section class="summaryGrid">
+          <article class="summaryCard">
+            <span>Employees</span>
+            <strong id="employeeCount">0</strong>
+          </article>
+          <article class="summaryCard">
+            <span>Connected now</span>
+            <strong id="connectedCount">0</strong>
+          </article>
+          <article class="summaryCard">
+            <span>Total connected today</span>
+            <strong id="teamToday">0h 0m</strong>
+          </article>
+          <article class="summaryCard interpretingSummary">
+            <span>Interpreting today</span>
+            <strong id="teamInterpretingToday">0h 0m</strong>
+          </article>
+          <article class="summaryCard callSummary">
+            <span>Calls today</span>
+            <strong id="teamCallsToday">0</strong>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panelTitle rowTitle">
+            <div>
+              <h2>Add employee</h2>
+              <p>The name you enter is the name shown in this dashboard.</p>
+            </div>
+          </div>
+
+          <div class="createRow">
+            <input id="deviceLabel" type="text" placeholder="Example: Angie" autocomplete="off">
+            <button id="createDeviceBtn" class="primary">Create code</button>
+          </div>
+
+          <div id="activationBox" class="activationBox hidden">
+            <div>
+              <span class="eyebrow">Activation code</span>
+              <strong id="activationEmployee"></strong>
+              <code id="activationCode"></code>
+              <p>Single use. Enter it only on the employee's computer.</p>
+            </div>
+            <button id="copyCodeBtn" class="secondary">Copy</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panelTitle rowTitle">
+            <div>
+              <h2>Today</h2>
+              <p>Connected = any status except OFFLINE. Interpreting = only INTERPRETING. Calls = each new transition into INTERPRETING. Daily counters reset at 12:00 AM Dominican Republic time.</p>
+            </div>
+            <span id="lastRefresh" class="muted small"></span>
+          </div>
+
+          <div id="employeeCards" class="employeeCards"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panelTitle rowTitle">
+            <div>
+              <h2>Date range totals</h2>
+              <p>Compare total connected time with actual interpreting time.</p>
+            </div>
+          </div>
+
+          <div class="rangeGrid">
+            <label>
+              <span>From</span>
+              <input id="fromDate" type="date">
+            </label>
+            <label>
+              <span>To</span>
+              <input id="toDate" type="date">
+            </label>
+          </div>
+
+          <div class="rangeActions">
+            <button id="loadRangeBtn" class="primary">Load totals</button>
+            <button id="exportBtn" class="secondary">Export CSV</button>
+          </div>
+
+          <div id="rangeCards" class="rangeCards"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

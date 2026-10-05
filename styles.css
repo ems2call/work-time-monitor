@@ -1,0 +1,499 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  color: #1f2937;
+  background: #f4f6f8;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: #f4f6f8;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+button, input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.appShell {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-height: 72px;
+  padding: 12px max(16px, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(244,246,248,.94);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(215,220,226,.9);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.brand img {
+  border-radius: 11px;
+}
+
+.brand h1 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.brand p {
+  margin: 3px 0 0;
+  color: #667085;
+  font-size: 12px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+main {
+  padding: 14px 14px 50px;
+}
+
+.panel {
+  margin-bottom: 14px;
+  padding: 17px;
+  background: white;
+  border: 1px solid #e2e7ec;
+  border-radius: 16px;
+  box-shadow: 0 2px 9px rgba(16,24,40,.035);
+}
+
+.loginPanel {
+  max-width: 520px;
+  margin: 28px auto;
+}
+
+.panelTitle {
+  margin-bottom: 15px;
+}
+
+.panelTitle h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.panelTitle p {
+  margin: 4px 0 0;
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.rowTitle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+label {
+  display: block;
+  margin-bottom: 13px;
+}
+
+label span, .eyebrow {
+  display: block;
+  margin-bottom: 6px;
+  color: #475467;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid #cbd3dc;
+  border-radius: 10px;
+  background: #fff;
+  color: #1f2937;
+  outline: none;
+  font-size: 16px;
+}
+
+input:focus {
+  border-color: #1c508c;
+  box-shadow: 0 0 0 3px rgba(28,80,140,.11);
+}
+
+button {
+  min-height: 44px;
+  padding: 9px 13px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primary {
+  background: #1c508c;
+  color: white;
+}
+
+.secondary {
+  background: #667085;
+  color: white;
+}
+
+.warning {
+  background: #b54708;
+  color: white;
+}
+
+.danger {
+  background: #b42318;
+  color: white;
+}
+
+.full {
+  width: 100%;
+}
+
+.compact {
+  min-height: 40px;
+  padding: 8px 11px;
+  font-size: 12px;
+}
+
+.iconBtn {
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+  background: white;
+  color: #344054;
+  border: 1px solid #d7dde4;
+}
+
+.textBtn {
+  min-height: auto;
+  padding: 4px;
+  color: #1c508c;
+  background: transparent;
+  font-size: 12px;
+}
+
+.message {
+  margin-top: 11px;
+  min-height: 17px;
+  font-size: 13px;
+}
+
+.good { color: #137333; }
+.bad { color: #b42318; }
+.muted { color: #667085; }
+.small { font-size: 11px; }
+.hidden { display: none !important; }
+
+.iosTip {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border-radius: 13px;
+  border: 1px solid #c9d8e8;
+  background: #f3f8fd;
+  font-size: 12px;
+}
+
+.iosTip strong {
+  color: #1c508c;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.summaryCard {
+  padding: 15px;
+  border: 1px solid #e2e7ec;
+  border-radius: 15px;
+  background: white;
+}
+
+.summaryCard.wide {
+  grid-column: 1 / -1;
+}
+
+.interpretingSummary strong {
+  color: #7a3e9d;
+}
+
+.summaryCard span {
+  display: block;
+  margin-bottom: 4px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.summaryCard strong {
+  display: block;
+  font-size: 25px;
+}
+
+.createRow {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  gap: 9px;
+}
+
+.activationBox {
+  margin-top: 13px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #f0c36d;
+  border-radius: 12px;
+  background: #fff8e8;
+}
+
+.activationBox strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.activationBox code {
+  display: block;
+  margin: 5px 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: .055em;
+  word-break: break-all;
+}
+
+.activationBox p {
+  margin: 5px 0 0;
+  color: #7a5b12;
+  font-size: 11px;
+}
+
+.employeeCards,
+.rangeCards {
+  display: grid;
+  gap: 10px;
+}
+
+.employeeCard {
+  padding: 14px;
+  border: 1px solid #e2e7ec;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.employeeTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.employeeName {
+  margin: 0;
+  font-size: 17px;
+}
+
+.badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.online {
+  color: #137333;
+  background: #e8f7ee;
+}
+
+.offline {
+  color: #667085;
+  background: #f2f4f7;
+}
+
+.employeeStats {
+  margin: 13px 0 11px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.stat {
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #f8f9fb;
+}
+
+.stat span {
+  display: block;
+  color: #667085;
+  font-size: 10px;
+}
+
+.stat strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 13px;
+}
+
+.employeeActions {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.employeeActions button {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
+.emptyState {
+  padding: 24px 10px;
+  text-align: center;
+  color: #667085;
+  font-size: 13px;
+}
+
+.rangeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.rangeActions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.rangeActions button {
+  flex: 1;
+}
+
+.rangeCard {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #e2e7ec;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.rangeCard strong {
+  white-space: nowrap;
+}
+
+@media (min-width: 760px) {
+  main {
+    padding: 20px 20px 60px;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .summaryCard.wide {
+    grid-column: auto;
+  }
+
+  .employeeCards {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .iosTip {
+    grid-template-columns: 1fr auto;
+  }
+
+  .iosTip span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .createRow {
+    grid-template-columns: 1fr;
+  }
+
+  .createRow button {
+    width: 100%;
+  }
+
+  .activationBox {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .activationBox button {
+    width: 100%;
+  }
+}
+
+.rangeCard {
+  align-items: center;
+}
+
+.rangeName {
+  font-weight: 700;
+}
+
+.rangeTimes {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+  font-size: 12px;
+}
+
+.rangeTimes span {
+  color: #667085;
+}
+
+.rangeTimes strong {
+  font-size: 13px;
+}
+
+.interpretingValue {
+  color: #7a3e9d;
+}
+
+.callSummary strong,.callValue{color:#0f6b78}
