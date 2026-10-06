@@ -1,4 +1,4 @@
-const CACHE = 'work-time-admin-v0.11.0';
+const CACHE = 'work-time-admin-v0.12.0';
 const SHELL = [
   './',
   './index.html',

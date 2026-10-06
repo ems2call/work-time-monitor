@@ -374,6 +374,14 @@ button {
   font-size: 13px;
 }
 
+.offlineTotalStat {
+  grid-column: 1 / -1;
+}
+
+.offlineTotalStat strong {
+  color: #b54708;
+}
+
 .employeeActions {
   display: flex;
   gap: 7px;

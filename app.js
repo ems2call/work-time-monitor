@@ -375,7 +375,10 @@ async function loadSnapshot() {
         interpreting_today_seconds: interpretingByDevice.get(row.device_id) || 0,
         calls_today: callsByDevice.get(row.device_id) || 0,
         started_today_at: attendance.started_today_at || null,
-        last_offline_at: attendance.last_offline_at || null
+        last_offline_at: attendance.last_offline_at || null,
+        offline_today_seconds: attendance.offline_today_seconds == null
+          ? null
+          : Number(attendance.offline_today_seconds) || 0
       };
     });
 
@@ -460,6 +463,10 @@ function renderSnapshot() {
         <div class="stat attendanceStat">
           <span>Last Offline</span>
           <strong>${formatDominicanTime(row.last_offline_at)}</strong>
+        </div>
+        <div class="stat offlineTotalStat">
+          <span>Offline Today</span>
+          <strong>${row.offline_today_seconds == null ? '—' : formatSeconds(row.offline_today_seconds)}</strong>
         </div>
       </div>
 
